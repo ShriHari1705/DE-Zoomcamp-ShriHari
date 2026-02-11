@@ -207,3 +207,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Ignore the local Postgres database folder
+ny_taxi_postgres_data/
+
+# Ignore any downloaded CSV or GZ data files
+*.csv
+*.csv.gz

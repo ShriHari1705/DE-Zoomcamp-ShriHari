@@ -217,3 +217,10 @@ ny_taxi_postgres_data/
 *.csv.gz
 
 /pipeline/google_credentials.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+tfplan
+.terraform.lock.hcl

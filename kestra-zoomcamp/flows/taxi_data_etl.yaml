@@ -1,0 +1,67 @@
+id: taxi_data_etl
+namespace: zoomcamp
+
+inputs:
+  - id: taxi
+    type: SELECT
+    values: ["green", "yellow"]
+    defaults: "green"
+  - id: year
+    type: SELECT
+    values: ["2019", "2020", "2021"]
+    defaults: "2020"
+  - id: month
+    type: SELECT
+    values: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+    defaults: "01"
+
+variables:
+  # Paste your full JSON key content between the quotes below
+  gcp_creds: |
+    {
+      "type": "service_account",
+      "project_id": "celtic-vent-487722-f0",
+      "private_key_id": "YOUR_KEY_ID",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_KEY_CONTENT_HERE\n-----END PRIVATE KEY-----\n",
+      "client_email": "terraform-runner@celtic-vent-487722-f0.iam.gserviceaccount.com",
+      "client_id": "123456789",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/...",
+      "universe_domain": "googleapis.com"
+    }
+  bucket_name: "celtic-vent-487722-f0-terra-bucket"
+  project_id: "celtic-vent-487722-f0"
+
+tasks:
+  - id: extract
+    type: io.kestra.plugin.core.http.Download
+    uri: "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{{inputs.taxi}}/{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv.gz"
+
+  - id: upload_to_gcs
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{ outputs.extract.uri }}"
+    to: "gs://{{ vars.bucket_name }}/{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv.gz"
+    serviceAccount: "{{ vars.gcp_creds }}"
+    projectId: "{{ vars.project_id }}"
+
+  - id: create_external_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    serviceAccount: "{{ vars.gcp_creds }}"
+    projectId: "{{ vars.project_id }}"
+    sql: |
+      CREATE OR REPLACE EXTERNAL TABLE `{{ vars.project_id }}.trips_data_all.{{inputs.taxi}}_taxi_{{inputs.year}}_{{inputs.month}}`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['gs://{{ vars.bucket_name }}/{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv.gz']
+      );
+
+triggers:
+  - id: weekly
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 0 * * 1"
+    inputs:
+      # Using double quotes and ensuring 'trigger.date' is mapped correctly
+      year: "{{ trigger.date | date('yyyy') }}"
+      month: "{{ trigger.date | date('MM') }}"

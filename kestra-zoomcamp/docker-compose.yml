@@ -1,0 +1,21 @@
+services:
+  kestra:
+    image: kestra/kestra:latest-full
+    command: server local
+    ports:
+      - 8080:8080
+    volumes:
+      # DO NOT map '.' to '/app'. Use a subfolder for your files.
+      - ./flows:/app/flows 
+      # Map your GCP key to a specific path
+      - /workspaces/DE-Zoomcamp-ShriHari/pipeline/google_credentials.json:/app/google_credentials.json
+    environment:
+      KESTRA_CONFIGURATION: |
+        kestra:
+          server:
+            basic-auth:
+              enabled: false
+          storage:
+            type: local
+            local:
+              base-path: /app/storage

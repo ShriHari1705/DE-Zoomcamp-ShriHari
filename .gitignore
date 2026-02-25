@@ -217,6 +217,7 @@ ny_taxi_postgres_data/
 *.csv.gz
 
 /pipeline/google_credentials.json
+/kestra-zoomcamp/google_credentials.json
 
 # Terraform
 .terraform/

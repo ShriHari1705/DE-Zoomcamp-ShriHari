@@ -218,6 +218,7 @@ ny_taxi_postgres_data/
 
 /pipeline/google_credentials.json
 /kestra-zoomcamp/google_credentials.json
+/kestra-zoomcamp/.env
 
 
 # Terraform
@@ -226,3 +227,6 @@ ny_taxi_postgres_data/
 *.tfstate.backup
 tfplan
 .terraform.lock.hcl
+logs/runs
+logs/*.log
+*.db

@@ -1,0 +1,40 @@
+version: 2
+
+sources:
+  - name: staging
+    database: celtic-vent-487722-f0
+    schema: trips_data_all
+    tables:
+dbt-zoomcamp/macros      - name: green_tripdata_2019
+      - name: green_tripdata_2020
+      - name: green_tripdata_2021
+      - name: yellow_tripdata_2019
+      - name: yellow_tripdata_2020
+      - name: yellow_tripdata_2021
+      - name: fhv_tripdata_2019
+
+models:
+  - name: stg_green_tripdata
+    description: Green taxi trips 2019-2021
+    columns:
+      - name: tripid
+        description: Primary key — surrogate key from vendorid + pickup_datetime
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null
+
+  - name: stg_yellow_tripdata
+    description: Yellow taxi trips 2019-2021
+    columns:
+      - name: tripid
+        description: Primary key — surrogate key from vendorid + pickup_datetime
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null
+
+  - name: stg_fhv_tripdata
+    description: FHV trips 2019

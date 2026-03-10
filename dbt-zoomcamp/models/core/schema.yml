@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: fact_trips
+    description: Combined green and yellow taxi trips with zone information
+    columns:
+      - name: tripid
+        description: Primary key
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null
+
+  - name: dim_zones
+    description: Taxi zone lookup table
+    columns:
+      - name: locationid
+        tests:
+          - unique
+          - not_null
